@@ -14,14 +14,14 @@ var requestAnimationFrame = window.requestAnimationFrame ||
 //initialize the world
 var world = {};
 world.gravity = 1;
-world.bgcolor = "#EEEEEE";
+world.bgcolor = "#224422";
 world.airresistance = 0.1;
 
 //initialize the objects object
 var objects = [];
 
 //define a circle object
-function Circle(radius, posX, posY, speedX, speedY, accelX, accelY, endtypeX, endtypeY, elasticityX, elasticityY, airresistance, gravity, color) {
+function Circle(radius, posX, posY, speedX, speedY, accelX, accelY, endtypeX, endtypeY, elasticityX, elasticityY, airresistance, gravity, mass, color) {
     this.type = "circle";
     this.radius = radius;
     this.posX = posX;
@@ -37,6 +37,7 @@ function Circle(radius, posX, posY, speedX, speedY, accelX, accelY, endtypeX, en
     this.airresistance = airresistance;
     this.gravity = gravity;
     this.color = color;
+    this.mass = mass;
 } // end circle object
 
 //define the update function for the circle
@@ -123,54 +124,53 @@ Circle.prototype.update = function() {
 
 
 //setup our circles
-var circle1 = new Circle(10, mainCanvas.width/2+200,mainCanvas.height/2,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2-50,mainCanvas.height/2,5,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#FFFFFF");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+219,mainCanvas.height/2+11,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+150,mainCanvas.height/2,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#DDDD00");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+219,mainCanvas.height/2-11,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+170,mainCanvas.height/2-11,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#700070");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+238,mainCanvas.height/2,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+170,mainCanvas.height/2+11,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#800000");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+238,mainCanvas.height/2+22,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+190,mainCanvas.height/2+22,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#800000");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+238,mainCanvas.height/2-22,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+190,mainCanvas.height/2,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#000000");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+257,mainCanvas.height/2+33,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+190,mainCanvas.height/2-22,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#DDDD00");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+257,mainCanvas.height/2+11,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+210,mainCanvas.height/2+33,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#009900");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+257,mainCanvas.height/2-11,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+210,mainCanvas.height/2+11,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#006699");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+257,mainCanvas.height/2-33,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+210,mainCanvas.height/2-11,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#BB0000");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+276,mainCanvas.height/2-44,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+210,mainCanvas.height/2-33,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#009900");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+276,mainCanvas.height/2-22,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+230,mainCanvas.height/2+44,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#BB0000");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+276,mainCanvas.height/2,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+230,mainCanvas.height/2+22,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#006699");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+276,mainCanvas.height/2+22,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+230,mainCanvas.height/2,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#FFA500");
 objects.push(circle1);
 
-var circle1 = new Circle(10, mainCanvas.width/2+276,mainCanvas.height/2+44,0,0,0,0,"bounce","bounce",1,1,0,0,"#006699");
+var circle1 = new Circle(10, mainCanvas.width/2+230,mainCanvas.height/2-22,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#700070");
 objects.push(circle1);
 
-var circle2 = new Circle(10,mainCanvas.width/2-300,mainCanvas.height/2,5,0,0,0,"bounce","bounce",0.5,0.5,0.04,0,"#FF0000");
-objects.push(circle2);
-
+var circle1 = new Circle(10, mainCanvas.width/2+230,mainCanvas.height/2-44,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#FFA500");
+objects.push(circle1);
 
 function drawAndUpdate() {
 
@@ -188,7 +188,7 @@ function drawAndUpdate() {
 
     //check for collissions
     for(i=0; i<objects.length; i++) {
-        for(var j=0; j<objects.length; j++) {
+        for(var j=i+1; j<objects.length; j++) {
             a = objects[i].posX;
             b = objects[i].posY;
             x = objects[j].posX;
@@ -198,22 +198,56 @@ function drawAndUpdate() {
                 dist = Math.pow((Math.pow((a-x),2)+Math.pow((b-y),2)),0.5);
                 if(dist < Math.abs(objects[i].radius + objects[j].radius)) {
 
-                    //impact angle
-                    impact_angle = Math.atan((y-b)/(x-a))
-                    console.log(impact_angle);
+                    //calculate relative velocity of objects (relative to objects[j])
+                    rel_velocity_i_x = objects[i].speedX - objects[j].speedX;
+                    rel_velocity_i_y = objects[i].speedY - objects[j].speedY;
+
+                    //caculate the total magnitude of the object[i]'s velocity (relative to object[j])
+                    rel_velocity_i = Math.sqrt(Math.pow(rel_velocity_i_x, 2) + Math.pow(rel_velocity_i_y, 2));
+
+                    //calculate the final velocity magnitude of each object (relative to object[j] initial frame)
+                    final_rel_velocity_i = rel_velocity_i * (objects[j].mass / (objects[j].mass + objects[i].mass));
+                    final_rel_velocity_j = rel_velocity_i * (objects[i].mass / (objects[j].mass + objects[i].mass));
+
+                    //calculate angle of line between centerlines and horizontal
+                    center_line_angle = Math.atan((objects[i].posY - objects[j].posY)/(objects[i].posX - objects[j].posX));
+                    console.log(center_line_angle);
+
+                    //correct angle for quadrants 2 and 3
+                    if(objects[j].posX < objects[i].posX) {
+                        center_line_angle += Math.PI;
+                    }
+                    console.log(center_line_angle);
+
+                    //calculate angle of object[i]'s relative velocity
+                    rel_velocity_angle = Math.atan(rel_velocity_i_y / rel_velocity_i_x);
+
+                    //correct angle for quadrants 2 and 3
+                    if(rel_velocity_i_x < 0) {
+                        rel_velocity_angle += Math.PI;
+                    }
+                    if(rel_velocity_angle < 0) {
+                        rel_velocity_angle += 2*Math.PI;
+                    }
+
+                    //calculate the final velocity angles for each object (in object[j]'s reference plane)
+                    if(rel_velocity_angle < center_line_angle) {
+                        velocity_angle_i = center_line_angle - (Math.PI/2);
+                    } else {
+                        velocity_angle_i = center_line_angle + (Math.PI/2);
+                    }
+                    velocity_angle_j = center_line_angle;
+
+                    console.log("I: "+velocity_angle_i);
+                    console.log("J: "+velocity_angle_j);
 
 
-                    //assume final speed of balls match
-                    //assume angles around the impact angle sum to 90?
+                    //calculate final velocity components for each object
+                    objects[i].speedX = final_rel_velocity_i * Math.cos(velocity_angle_i) + objects[j].speedX;
+                    objects[i].speedY = final_rel_velocity_i * Math.sin(velocity_angle_i) + objects[j].speedY; 
+                    objects[j].speedX = final_rel_velocity_j * Math.cos(velocity_angle_j) + objects[j].speedX;
+                    objects[j].speedY = final_rel_velocity_j * Math.sin(velocity_angle_j) + objects[j].speedY;
 
-                    //get direction and magnitude of velocity j;
-
-
-
-                    //calculate new direction and magnitude of velocity i;
-
-                    console.log("collision! "+i+":"+j+" "+dist+":"+(objects[i].radius+objects[j].radius)+" "+a+":"+b+" "+x+":"+y);
-                
 
 
                 }                
