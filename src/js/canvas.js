@@ -20,16 +20,26 @@ world.airresistance = 0.1;
 //initialize the objects object
 var objects = [];
 
+//initialize some variables for tracking the framerate
+var startingT;
+var lastT;
+var totalT;
+var deltaT;
+var currentT;
+
 //define a circle object
-function Circle(radius, posX, posY, speedX, speedY, accelX, accelY, endtypeX, endtypeY, elasticityX, elasticityY, airresistance, gravity, mass, color) {
+function Circle(radius, posX, posY, speedX, speedY, endtypeX, endtypeY, elasticityX, elasticityY, airresistance, gravity, mass, color) {
+    
+    //alert(gravity);
+
     this.type = "circle";
     this.radius = radius;
     this.posX = posX;
     this.posY = posY;
     this.speedX = speedX;
     this.speedY = speedY;
-    this.accelX = accelX;
-    this.accelY = accelY;
+    this.accelX = 0;
+    this.accelY = 0;
     this.endtypeX = endtypeX;
     this.endtypeY = endtypeY;
     this.elasticityX = elasticityX;
@@ -38,13 +48,14 @@ function Circle(radius, posX, posY, speedX, speedY, accelX, accelY, endtypeX, en
     this.gravity = gravity;
     this.color = color;
     this.mass = mass;
+
 } // end circle object
 
 //define the update function for the circle
 Circle.prototype.update = function() {
 
     //process acceleration in the X direction
-    this.speedX += this.accelX;
+    this.speedX += this.accelX;//* deltaT;
     this.speedX *= (1-(this.airresistance*world.airresistance));
 
     //move the object horizontally
@@ -84,7 +95,7 @@ Circle.prototype.update = function() {
     //move the object vertically
     this.posY += this.speedY;
 
-    //check for horizontal edges
+    //check for vertical edges
     if(this.posY < this.radius || this.posY > canvasHeight-this.radius) {
 
         //we are outside the edge - check what we are supposed to do
@@ -122,57 +133,108 @@ Circle.prototype.update = function() {
 
 } //end of update function
 
+function colDetect() {
 
-//setup our circles
-var circle1 = new Circle(10, mainCanvas.width/2-50,mainCanvas.height/2,5,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#FFFFFF");
-objects.push(circle1);
+    //check for collissions
+    for(i=0; i<objects.length; i++) {
 
-var circle1 = new Circle(10, mainCanvas.width/2+150,mainCanvas.height/2,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#DDDD00");
-objects.push(circle1);
+        for(var j=i+1; j<objects.length; j++) {
 
-var circle1 = new Circle(10, mainCanvas.width/2+170,mainCanvas.height/2-11,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#700070");
-objects.push(circle1);
+            if(i!=j) {
 
-var circle1 = new Circle(10, mainCanvas.width/2+170,mainCanvas.height/2+11,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#800000");
-objects.push(circle1);
+                //calculate relative velocity of objects (relative to objects[j])
+                var rel_velocity = {};
+                rel_velocity.x = objects[i].speedX - objects[j].speedX;
+                rel_velocity.y = objects[i].speedY - objects[j].speedY;
+                rel_velocity.magnitude = Math.sqrt(Math.pow(rel_velocity.x, 2) + Math.pow(rel_velocity.y, 2));
+                rel_velocity.angle = Math.atan2(rel_velocity.y, rel_velocity.x);
 
-var circle1 = new Circle(10, mainCanvas.width/2+190,mainCanvas.height/2+22,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#800000");
-objects.push(circle1);
+                //calculate the x and y components of a unit vector in the direction of the relative velocity
+                rel_velocity.unit = {};
+                rel_velocity.unit.x = Math.sin(rel_velocity.angle);
+                rel_velocity.unit.y = Math.cos(rel_velocity.angle);
 
-var circle1 = new Circle(10, mainCanvas.width/2+190,mainCanvas.height/2,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#000000");
-objects.push(circle1);
+                //check how far i will move relative to j in a single frame
+                deltaDist = rel_velocity.magnitude * deltaT;
 
-var circle1 = new Circle(10, mainCanvas.width/2+190,mainCanvas.height/2-22,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#DDDD00");
-objects.push(circle1);
+                //calculate the distance between the objects
+                var dist = {};
+                dist.x = objects[j].posX - objects[i].posX;
+                dist.y = objects[j].posY - objects[i].posY;
+                dist.magnitude = Math.sqrt((Math.pow((dist.x),2)+Math.pow((dist.y),2)));
+                dist.angle = Math.atan2(dist.y , dist.x);
 
-var circle1 = new Circle(10, mainCanvas.width/2+210,mainCanvas.height/2+33,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#009900");
-objects.push(circle1);
+                //calculate the dot product between the relative velocity and distance vectors
+                var distDot = dist.x * rel_velocity.x + dist.y * rel_velocity.y;
 
-var circle1 = new Circle(10, mainCanvas.width/2+210,mainCanvas.height/2+11,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#006699");
-objects.push(circle1);
+                //calculate an intermediate value
+                var d = dist.x * rel_velocity.unit.x + dist.y * rel_velocity.unit.y;
 
-var circle1 = new Circle(10, mainCanvas.width/2+210,mainCanvas.height/2-11,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#BB0000");
-objects.push(circle1);
+                //calculate distance between our trajectory and the center of the target
+                var f = Math.pow(dist.magnitude,2) - Math.pow(d, 2);
 
-var circle1 = new Circle(10, mainCanvas.width/2+210,mainCanvas.height/2-33,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#009900");
-objects.push(circle1);
+                //quick check for a collision to see if we need to check further
+                if(deltaDist > dist.magnitude - objects[i].radius - objects[j].radius && distDot > 0 && f <= Math.pow((objects[i].radius + objects[j].radius),2)) {
 
-var circle1 = new Circle(10, mainCanvas.width/2+230,mainCanvas.height/2+44,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#BB0000");
-objects.push(circle1);
+                    //we may have a collision - calculate the impact distance
+                    var t = Math.pow((objects[i].radius + objects[j].radius),2) - f;
+                    var impact_distance = d - Math.sqrt(t);
 
-var circle1 = new Circle(10, mainCanvas.width/2+230,mainCanvas.height/2+22,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#006699");
-objects.push(circle1);
+                    if(impact_distance <= rel_velocity.magnitude) {
 
-var circle1 = new Circle(10, mainCanvas.width/2+230,mainCanvas.height/2,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#FFA500");
-objects.push(circle1);
+                        //we have a collission - correct the objects speed and position
+                        collision(i,j,rel_velocity,dist);
 
-var circle1 = new Circle(10, mainCanvas.width/2+230,mainCanvas.height/2-22,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#700070");
-objects.push(circle1);
+                    } //end impact code
+                } //end quick escapes
+            } // end check that both objects are the same object
+        } // end inner loop over all objects
+    } // end outer loop over all objects
 
-var circle1 = new Circle(10, mainCanvas.width/2+230,mainCanvas.height/2-44,0,0,0,0,"bounce","bounce",1,1,0.05,0,1,"#FFA500");
-objects.push(circle1);
+}
 
-function drawAndUpdate() {
+function collision(i,j,rel_velocity,dist) {
+
+    //calculate the final velocity magnitude of each object (relative to object[j] initial frame)
+    final_rel_velocity = {};
+    final_rel_velocity.i = rel_velocity.magnitude * (objects[j].mass / (objects[j].mass + objects[i].mass));
+    final_rel_velocity.j = rel_velocity.magnitude * (objects[i].mass / (objects[j].mass + objects[i].mass));
+
+    //calculate the final velocity angles for each object (in object[j]'s reference plane)
+    if(rel_velocity.angle < dist.angle) {
+        velocity_angle_i = dist.angle - (Math.PI/2);
+    } else {
+        velocity_angle_i = dist.angle + (Math.PI/2);
+    }
+    velocity_angle_j = dist.angle;
+
+    //calculate final velocity components for each object
+    objects[i].speedX = final_rel_velocity.i * Math.cos(velocity_angle_i) + objects[j].speedX;
+    objects[i].speedY = final_rel_velocity.i * Math.sin(velocity_angle_i) + objects[j].speedY; 
+    objects[j].speedX = final_rel_velocity.j * Math.cos(velocity_angle_j) + objects[j].speedX;
+    objects[j].speedY = final_rel_velocity.j * Math.sin(velocity_angle_j) + objects[j].speedY;
+
+}
+
+function addCircle (e) {
+
+    //grab user parameters
+    var radius = $("#user_radius").val();
+    var mass = $("#user_mass").val();
+    var color = $("#user_color").val();
+    var gravity = $("#user_gravity").val();
+
+    objects.push(new Circle(radius,e.clientX,e.clientY,0,0,"bounce","bounce",1,1,0.05,gravity,mass,color));
+}
+
+function drawAndUpdate(currentT) {
+
+    //track the frame rate
+    if(!startingT) { startingT = currentT; }
+    if(!lastT) { lastT = currentT; }
+    totalT = (currentT - startingT) / 1000;
+    deltaT = (currentT - lastT) / 1000;
+    lastT = currentT;
 
     //clear the previous frame
     mainContext.clearRect(0,0,mainCanvas.width,mainCanvas.height);
@@ -183,82 +245,17 @@ function drawAndUpdate() {
 
     for(var i=0; i < objects.length; i++) {
         var myObject = objects[i];
-        myObject.update();
+        myObject.update(deltaT);
     }
 
-    //check for collissions
-    for(i=0; i<objects.length; i++) {
-        for(var j=i+1; j<objects.length; j++) {
-            a = objects[i].posX;
-            b = objects[i].posY;
-            x = objects[j].posX;
-            y = objects[j].posY;
-
-            if(i!=j) {
-                dist = Math.pow((Math.pow((a-x),2)+Math.pow((b-y),2)),0.5);
-                if(dist < Math.abs(objects[i].radius + objects[j].radius)) {
-
-                    //calculate relative velocity of objects (relative to objects[j])
-                    rel_velocity_i_x = objects[i].speedX - objects[j].speedX;
-                    rel_velocity_i_y = objects[i].speedY - objects[j].speedY;
-
-                    //caculate the total magnitude of the object[i]'s velocity (relative to object[j])
-                    rel_velocity_i = Math.sqrt(Math.pow(rel_velocity_i_x, 2) + Math.pow(rel_velocity_i_y, 2));
-
-                    //calculate the final velocity magnitude of each object (relative to object[j] initial frame)
-                    final_rel_velocity_i = rel_velocity_i * (objects[j].mass / (objects[j].mass + objects[i].mass));
-                    final_rel_velocity_j = rel_velocity_i * (objects[i].mass / (objects[j].mass + objects[i].mass));
-
-                    //calculate angle of line between centerlines and horizontal
-                    center_line_angle = Math.atan((objects[i].posY - objects[j].posY)/(objects[i].posX - objects[j].posX));
-                    console.log(center_line_angle);
-
-                    //correct angle for quadrants 2 and 3
-                    if(objects[j].posX < objects[i].posX) {
-                        center_line_angle += Math.PI;
-                    }
-                    console.log(center_line_angle);
-
-                    //calculate angle of object[i]'s relative velocity
-                    rel_velocity_angle = Math.atan(rel_velocity_i_y / rel_velocity_i_x);
-
-                    //correct angle for quadrants 2 and 3
-                    if(rel_velocity_i_x < 0) {
-                        rel_velocity_angle += Math.PI;
-                    }
-                    if(rel_velocity_angle < 0) {
-                        rel_velocity_angle += 2*Math.PI;
-                    }
-
-                    //calculate the final velocity angles for each object (in object[j]'s reference plane)
-                    if(rel_velocity_angle < center_line_angle) {
-                        velocity_angle_i = center_line_angle - (Math.PI/2);
-                    } else {
-                        velocity_angle_i = center_line_angle + (Math.PI/2);
-                    }
-                    velocity_angle_j = center_line_angle;
-
-                    console.log("I: "+velocity_angle_i);
-                    console.log("J: "+velocity_angle_j);
-
-
-                    //calculate final velocity components for each object
-                    objects[i].speedX = final_rel_velocity_i * Math.cos(velocity_angle_i) + objects[j].speedX;
-                    objects[i].speedY = final_rel_velocity_i * Math.sin(velocity_angle_i) + objects[j].speedY; 
-                    objects[j].speedX = final_rel_velocity_j * Math.cos(velocity_angle_j) + objects[j].speedX;
-                    objects[j].speedY = final_rel_velocity_j * Math.sin(velocity_angle_j) + objects[j].speedY;
-
-
-
-                }                
-            }
-        }
-    }
-
-
+    //perform collision detection
+    colDetect();
 
     requestAnimationFrame(drawAndUpdate);
 }
+
+//add an event listener for mouse clicks
+$("#viewPort").mousedown(event, addCircle);
 
 drawAndUpdate();
 
