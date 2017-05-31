@@ -223,8 +223,10 @@ function addCircle (e) {
     var mass = $("#user_mass").val();
     var color = $("#user_color").val();
     var gravity = $("#user_gravity").val();
+    var xspeed = $("#user_speedx").val();
+    var yspeed = $("#user_speedy").val();
 
-    objects.push(new Circle(radius,e.clientX,e.clientY,0,0,"bounce","bounce",1,1,0.05,gravity,mass,color));
+    objects.push(new Circle(radius,e.clientX,e.clientY,xspeed,yspeed,"bounce","bounce",1,1,0.05,gravity,mass,color));
 }
 
 function drawAndUpdate(currentT) {
